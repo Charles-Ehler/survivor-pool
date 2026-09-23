@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Survivor Pool</title>
+<script>
+// ===== EDIT THIS PART ONLY =====
+// Your picks. One woman and one man each.
+const PLAYERS = [
+  { name: "Charles",  picks: ["Woman pick", "Man pick"] },
+  { name: "Coworker", picks: ["Woman pick", "Man pick"] },
+];
+
+// Every vote, in order. Add one line after each tribal council:
+// the name of the person who went home. Double boot night = two lines.
+const VOTES = [
+  // "Name of first person voted out",
+];
+// ===== END OF EDIT PART =====
+</script>
+<style>
+  :root { --bg:#f6f1e7; --card:#fffdf8; --ink:#2b2118; --muted:#7a6a58; --fire:#c2410c; --out:#a8a29e; --line:#e7dccb; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#1c1712; --card:#27201a; --ink:#f3ead9; --muted:#b3a38c; --fire:#fb923c; --out:#6b635b; --line:#3a3027; } }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.5 system-ui, sans-serif; }
+  main { max-width:720px; margin:0 auto; padding:32px 16px 64px; }
+  h1 { margin:0; font-size:2rem; letter-spacing:-.02em; }
+  .sub { color:var(--muted); margin:4px 0 24px; }
+  .owe { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:20px; font-size:1.4rem; font-weight:700; margin-bottom:16px; }
+  .owe small { display:block; font-size:.9rem; font-weight:400; color:var(--muted); }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:16px; margin-bottom:24px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:20px; }
+  .card h2 { margin:0 0 4px; font-size:1.1rem; }
+  .total { font-size:2.2rem; font-weight:800; color:var(--fire); }
+  ul { list-style:none; padding:0; margin:12px 0 0; }
+  li { display:flex; justify-content:space-between; padding:6px 0; border-top:1px solid var(--line); }
+  li.gone span:first-child { color:var(--out); text-decoration:line-through; }
+  table { width:100%; border-collapse:collapse; background:var(--card); border:1px solid var(--line); border-radius:12px; overflow:hidden; }
+  th, td { text-align:left; padding:8px 12px; border-top:1px solid var(--line); }
+  th { color:var(--muted); font-weight:600; font-size:.85rem; border-top:0; }
+  td.n { text-align:right; font-variant-numeric:tabular-nums; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Survivor Pool</h1>
+  <p class="sub">$1 for every vote each of your picks survives.</p>
+  <div class="owe" id="owe"></div>
+  <div class="grid" id="players"></div>
+  <table id="log"></table>
+</main>
+<script>
+const norm = s => s.trim().toLowerCase();
+
+// A pick earns $1 on every vote they are still in the game after.
+function score(pick) {
+  const out = VOTES.findIndex(v => norm(v) === norm(pick));
+  return out === -1 ? VOTES.length : out;
+}
+
+const totals = PLAYERS.map(p => p.picks.reduce((sum, pick) => sum + score(pick), 0));
+
+document.getElementById("players").innerHTML = PLAYERS.map((p, i) => `
+  <div class="card">
+    <h2>${p.name}</h2>
+    <div class="total">$${totals[i]}</div>
+    <ul>${p.picks.map(pick => {
+      const gone = score(pick) < VOTES.length;
+      return `<li class="${gone ? "gone" : ""}"><span>${pick}</span><span>$${score(pick)}${gone ? " (out)" : ""}</span></li>`;
+    }).join("")}</ul>
+  </div>`).join("");
+
+const [a, b] = totals, diff = Math.abs(a - b);
+const leader = a > b ? 0 : 1;
+document.getElementById("owe").innerHTML = diff === 0
+  ? `All even. <small>${VOTES.length} vote${VOTES.length === 1 ? "" : "s"} so far.</small>`
+  : `${PLAYERS[1 - leader].name} owes ${PLAYERS[leader].name} $${diff}. <small>After ${VOTES.length} vote${VOTES.length === 1 ? "" : "s"}.</small>`;
+
+document.getElementById("log").innerHTML = VOTES.length === 0
+  ? `<tr><td>No votes yet. Add the first boot after tonight's tribal.</td></tr>`
+  : `<tr><th>#</th><th>Voted out</th>${PLAYERS.map(p => `<th class="n">${p.name}</th>`).join("")}</tr>` +
+    VOTES.map((v, i) => `<tr><td>${i + 1}</td><td>${v}</td>${PLAYERS.map(p =>
+      `<td class="n">+$${p.picks.filter(pick => score(pick) > i).length}</td>`).join("")}</tr>`).join("");
+</script>
+</body>
+</html>
