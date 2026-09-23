@@ -3,85 +3,199 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Survivor Pool</title>
+<title>Survivor 51 Pool</title>
 <script>
 // ===== EDIT THIS PART ONLY =====
-// Your picks. One woman and one man each.
+// One woman and one man each. Names must match the cast list.
+// To add someone, copy a line. Photos go in photos/first-last.webp.
 const PLAYERS = [
-  { name: "Charles",  picks: ["Patt Cannaday", "Mike Pinsky"] },
-  { name: "Cindy",    picks: ["Alexis Levine", "Carter Krull"] },
-];
-
-// Every vote, in order. Add one line after each tribal council:
-// the name of the person who went home. Double boot night = two lines.
-const VOTES = [
-  // "Name of first person voted out",
+  { name: "Charles", picks: ["Patt Cannaday", "Mike Pinsky"] },
+  { name: "Cindy",   picks: ["Alexis Levine", "Carter Krull"] },
 ];
 // ===== END OF EDIT PART =====
 </script>
+<script src="pool.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
-  :root { --bg:#f6f1e7; --card:#fffdf8; --ink:#2b2118; --muted:#7a6a58; --fire:#c2410c; --out:#a8a29e; --line:#e7dccb; }
-  @media (prefers-color-scheme: dark) { :root { --bg:#1c1712; --card:#27201a; --ink:#f3ead9; --muted:#b3a38c; --fire:#fb923c; --out:#6b635b; --line:#3a3027; } }
+  :root {
+    --night:#0b1410; --panel:#13221a; --panel2:#1a2e23; --line:#2a4234;
+    --ink:#f4ead6; --muted:#a9bba9; --fire:#ff7a1a; --ember:#ffc24a; --blood:#e2452b;
+    --savu:#3aa0ff; --toka:#ffb000; --none:#9aa39a;
+  }
   * { box-sizing:border-box; }
-  body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.5 system-ui, sans-serif; }
-  main { max-width:720px; margin:0 auto; padding:32px 16px 64px; }
-  h1 { margin:0; font-size:2rem; letter-spacing:-.02em; }
-  .sub { color:var(--muted); margin:4px 0 24px; }
-  .owe { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:20px; font-size:1.4rem; font-weight:700; margin-bottom:16px; }
-  .owe small { display:block; font-size:.9rem; font-weight:400; color:var(--muted); }
-  .grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:16px; margin-bottom:24px; }
-  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:20px; }
-  .card h2 { margin:0 0 4px; font-size:1.1rem; }
-  .total { font-size:2.2rem; font-weight:800; color:var(--fire); }
-  ul { list-style:none; padding:0; margin:12px 0 0; }
-  li { display:flex; justify-content:space-between; padding:6px 0; border-top:1px solid var(--line); }
-  li.gone span:first-child { color:var(--out); text-decoration:line-through; }
-  table { width:100%; border-collapse:collapse; background:var(--card); border:1px solid var(--line); border-radius:12px; overflow:hidden; }
+  body {
+    margin:0; color:var(--ink); font:16px/1.5 Inter, system-ui, sans-serif;
+    background:
+      radial-gradient(ellipse 80% 50% at 50% -10%, #ff7a1a33, transparent 70%),
+      radial-gradient(ellipse 60% 40% at 50% 110%, #0f5f5a55, transparent 70%),
+      var(--night);
+    min-height:100vh;
+  }
+  main { max-width:960px; margin:0 auto; padding:32px 16px 64px; }
+  .display { font-family:"Bebas Neue", Impact, sans-serif; letter-spacing:.04em; line-height:.95; }
+
+  header { text-align:center; margin-bottom:28px; }
+  .kicker { color:var(--ember); font-weight:800; letter-spacing:.3em; font-size:.8rem; text-transform:uppercase; }
+  h1 { font-size:clamp(3rem, 11vw, 6.5rem); margin:6px 0 4px;
+       background:linear-gradient(180deg, var(--ember), var(--fire) 55%, var(--blood));
+       -webkit-background-clip:text; background-clip:text; color:transparent;
+       filter:drop-shadow(0 4px 18px #ff7a1a55); }
+  .tag { color:var(--muted); font-style:italic; }
+
+  .banner { background:linear-gradient(135deg, var(--panel2), var(--panel)); border:1px solid var(--line);
+            border-radius:18px; padding:22px; text-align:center; margin-bottom:18px; }
+  .banner .big { font-size:clamp(2rem, 6vw, 3.2rem); }
+  .banner .big b { color:var(--ember); font-weight:400; }
+  .banner small { color:var(--muted); display:block; margin-top:6px; }
+  .spoken { border-color:var(--blood); animation:pulse 1.6s ease-out 2; }
+  @keyframes pulse { 0% { box-shadow:0 0 0 0 #e2452baa; } 100% { box-shadow:0 0 0 24px #e2452b00; } }
+
+  .players { display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:18px; margin:26px 0 34px; }
+  .player { background:var(--panel); border:1px solid var(--line); border-radius:18px; padding:18px; }
+  .player .top { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:12px; }
+  .player h2 { margin:0; font-size:2rem; }
+  .money { font-size:2.6rem; color:var(--ember); }
+  .net { font-weight:800; font-size:.85rem; }
+  .net.up { color:#7ee08a; } .net.down { color:var(--blood); }
+  .picks { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+
+  .pick { position:relative; border-radius:14px; overflow:hidden; aspect-ratio:3/4; background:var(--panel2); }
+  .pick img { position:relative; width:100%; height:100%; object-fit:cover; object-position:50% 12%; display:block; }
+  .pick .initials { position:absolute; inset:0; display:grid; place-items:center; font-size:3.5rem; color:var(--muted); }
+  .pick .cap { position:absolute; inset:auto 0 0 0; padding:28px 10px 10px;
+               background:linear-gradient(transparent, #000c 55%); }
+  .pick .cap .n { font-size:1.35rem; }
+  .pick .cap .e { font-size:.8rem; color:var(--ember); font-weight:600; }
+  .torch { position:absolute; top:8px; right:8px; font-size:1.6rem; filter:drop-shadow(0 0 8px var(--fire));
+           animation:flicker 1.3s infinite alternate ease-in-out; transform-origin:50% 100%; }
+  @keyframes flicker { 0% { transform:scale(1) rotate(-3deg); opacity:.9; } 100% { transform:scale(1.12) rotate(3deg); opacity:1; } }
+  .pick.out img { filter:grayscale(1) brightness(.55); }
+  .pick.out .torch { animation:none; filter:none; }
+  .stamp { position:absolute; top:42%; left:50%; transform:translate(-50%,-50%) rotate(-12deg);
+           border:3px solid var(--blood); color:var(--blood); padding:2px 10px; font-size:1.3rem;
+           background:#0008; white-space:nowrap; }
+
+  .tribe { display:inline-block; font-size:.7rem; font-weight:800; letter-spacing:.12em; text-transform:uppercase;
+           padding:1px 7px; border-radius:99px; color:#111; }
+  .t-savu { background:var(--savu); } .t-toka { background:var(--toka); } .t-none { background:var(--none); }
+
+  h3 { font-size:2rem; margin:0 0 12px; }
+  .cast { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:34px; }
+  .chip { background:var(--panel); border:1px solid var(--line); border-radius:99px; padding:6px 12px; font-size:.9rem; }
+  .chip .own { color:var(--ember); font-weight:800; margin-left:6px; }
+  .chip.out { opacity:.45; text-decoration:line-through; }
+
+  table { width:100%; border-collapse:collapse; background:var(--panel); border:1px solid var(--line); border-radius:14px; overflow:hidden; }
   th, td { text-align:left; padding:8px 12px; border-top:1px solid var(--line); }
-  th { color:var(--muted); font-weight:600; font-size:.85rem; border-top:0; }
-  td.n { text-align:right; font-variant-numeric:tabular-nums; }
+  th { color:var(--muted); font-size:.8rem; border-top:0; }
+  td.n, th.n { text-align:right; font-variant-numeric:tabular-nums; }
+  .rules, footer { color:var(--muted); font-size:.85rem; text-align:center; margin-top:26px; }
+  .warn { color:var(--blood); font-weight:600; text-align:center; }
+  .toast { position:fixed; left:50%; bottom:20px; transform:translateX(-50%); background:var(--blood); color:#fff;
+           padding:12px 20px; border-radius:99px; font-weight:800; box-shadow:0 8px 30px #000a; }
+  @media (prefers-reduced-motion: reduce) { .torch, .spoken { animation:none; } }
 </style>
 </head>
 <body>
 <main>
-  <h1>Survivor Pool</h1>
-  <p class="sub">$1 for every vote each of your picks survives.</p>
-  <div class="owe" id="owe"></div>
-  <div class="grid" id="players"></div>
-  <table id="log"></table>
+  <header>
+    <div class="kicker">Survivor 51 · Office Pool</div>
+    <h1 class="display">Outwit. Outplay. Out-earn.</h1>
+    <div class="tag">$1 for every vote your castaways survive.</div>
+  </header>
+  <div id="app"><div class="banner"><div class="big display">Paddling out to the island...</div></div></div>
+  <footer id="foot"></footer>
 </main>
 <script>
-const norm = s => s.trim().toLowerCase();
+const slug = s => norm(s).replace(/[^a-z]+/g, "-");
+const initials = s => norm(s).split(" ").map(w => w[0]).join("").toUpperCase();
+const clock = d => d.toLocaleTimeString([], { hour:"numeric", minute:"2-digit", hour12:true });
+let lastBoots = null;
 
-// A pick earns $1 on every vote they are still in the game after.
-function score(pick) {
-  const out = VOTES.findIndex(v => norm(v) === norm(pick));
-  return out === -1 ? VOTES.length : out;
+function render({ cast, boots }) {
+  const table = standings(PLAYERS, boots);
+  const tribeOf = n => (cast.find(c => norm(c.name) === norm(n)) || {}).tribe || "none";
+  const owner = n => PLAYERS.filter(p => p.picks.some(k => norm(k) === norm(n))).map(p => p.name).join(", ");
+  const missing = PLAYERS.flatMap(p => p.picks).filter(k => !cast.some(c => norm(c.name) === norm(k)));
+  const votes = `${boots.length} vote${boots.length === 1 ? "" : "s"}`;
+
+  let money;
+  if (boots.length === 0) money = `<div class="big display">Day 1. Everyone's even. <b>For now.</b></div><small>First tribal is tonight.</small>`;
+  else if (table.every(p => p.net === 0)) money = `<div class="big display">Dead even after ${votes}</div>`;
+  else if (table.length === 2) {
+    const [w, l] = [...table].sort((a, b) => b.net - a.net);
+    money = `<div class="big display">${l.name} owes ${w.name} <b>$${w.net}</b></div><small>After ${votes}.</small>`;
+  } else {
+    money = `<div class="big display">${table.map(p => `${p.name} <b>${p.net < 0 ? "-" : "+"}$${Math.abs(p.net)}</b>`).join(" · ")}</div><small>Everyone settles with everyone. After ${votes}.</small>`;
+  }
+
+  const latest = boots.at(-1);
+  const spoken = latest ? `
+    <div class="banner spoken">
+      <div class="kicker">Latest boot</div>
+      <div class="big display">🔥 ${latest}. The tribe has spoken.</div>
+      ${owner(latest) ? `<small>That was ${owner(latest)}'s pick.</small>` : ""}
+    </div>` : "";
+
+  const pickCard = k => `
+    <div class="pick ${k.out ? "out" : ""}">
+      <div class="initials display">${initials(k.name)}</div>
+      <img src="photos/${slug(k.name)}.webp" alt="${k.name}" onerror="this.remove()">
+      <span class="torch" aria-hidden="true">${k.out ? "💨" : "🔥"}</span>
+      ${k.out ? `<div class="stamp display">Torch snuffed</div>` : ""}
+      <div class="cap">
+        <span class="tribe t-${tribeOf(k.name)}">${tribeOf(k.name)}</span>
+        <div class="n display">${k.name}</div>
+        <div class="e">$${k.earned} earned${k.out ? `, out at vote ${k.earned + 1}` : ""}</div>
+      </div>
+    </div>`;
+
+  document.getElementById("app").innerHTML = `
+    ${spoken}
+    <div class="banner">${money}</div>
+    ${missing.length ? `<p class="warn">Can't find ${missing.join(", ")} in the cast. Check the spelling.</p>` : ""}
+    <div class="players">${table.map(p => `
+      <div class="player">
+        <div class="top">
+          <h2 class="display">${p.name}</h2>
+          <div style="text-align:right"><div class="money display">$${p.total}</div>
+            <div class="net ${p.net > 0 ? "up" : p.net < 0 ? "down" : ""}">${p.net === 0 ? "even" : `${p.net > 0 ? "up" : "down"} $${Math.abs(p.net)}`}</div></div>
+        </div>
+        <div class="picks">${p.picks.map(pickCard).join("")}</div>
+      </div>`).join("")}
+    </div>
+    <h3 class="display">Still on the island: ${cast.length - boots.length} of ${cast.length}</h3>
+    <div class="cast">${[...cast].sort((a, b) => a.out - b.out || a.name.localeCompare(b.name)).map(c => `
+      <span class="chip ${c.out ? "out" : ""}"><span class="tribe t-${c.tribe}">${c.tribe}</span> ${c.name}${owner(c.name) ? `<span class="own">${owner(c.name)}</span>` : ""}</span>`).join("")}
+    </div>
+    ${boots.length ? `
+      <h3 class="display">Tribal Council Log</h3>
+      <table><tr><th>#</th><th>Voted out</th>${PLAYERS.map(p => `<th class="n">${p.name}</th>`).join("")}</tr>
+      ${boots.map((b, i) => `<tr><td>${i + 1}</td><td>${b}</td>${PLAYERS.map(p =>
+        `<td class="n">+$${p.picks.filter(k => { const j = boots.findIndex(x => norm(x) === norm(k)); return j === -1 || j > i; }).length}</td>`).join("")}</tr>`).join("")}
+      </table>` : ""}
+    <p class="rules">Rules: after every vote, each of your castaways still in the game earns you $1. Quits and medevacs count as a vote.</p>`;
 }
 
-const totals = PLAYERS.map(p => p.picks.reduce((sum, pick) => sum + score(pick), 0));
-
-document.getElementById("players").innerHTML = PLAYERS.map((p, i) => `
-  <div class="card">
-    <h2>${p.name}</h2>
-    <div class="total">$${totals[i]}</div>
-    <ul>${p.picks.map(pick => {
-      const gone = score(pick) < VOTES.length;
-      return `<li class="${gone ? "gone" : ""}"><span>${pick}</span><span>$${score(pick)}${gone ? " (out)" : ""}</span></li>`;
-    }).join("")}</ul>
-  </div>`).join("");
-
-const [a, b] = totals, diff = Math.abs(a - b);
-const leader = a > b ? 0 : 1;
-document.getElementById("owe").innerHTML = diff === 0
-  ? `All even. <small>${VOTES.length} vote${VOTES.length === 1 ? "" : "s"} so far.</small>`
-  : `${PLAYERS[1 - leader].name} owes ${PLAYERS[leader].name} $${diff}. <small>After ${VOTES.length} vote${VOTES.length === 1 ? "" : "s"}.</small>`;
-
-document.getElementById("log").innerHTML = VOTES.length === 0
-  ? `<tr><td>No votes yet. Add the first boot after tonight's tribal.</td></tr>`
-  : `<tr><th>#</th><th>Voted out</th>${PLAYERS.map(p => `<th class="n">${p.name}</th>`).join("")}</tr>` +
-    VOTES.map((v, i) => `<tr><td>${i + 1}</td><td>${v}</td>${PLAYERS.map(p =>
-      `<td class="n">+$${p.picks.filter(pick => score(pick) > i).length}</td>`).join("")}</tr>`).join("");
+async function update() {
+  const foot = document.getElementById("foot");
+  try {
+    const { parse } = await (await fetch(WIKI, { cache:"no-store" })).json();
+    const data = parseCast(parse.wikitext);
+    if (lastBoots !== null && data.boots.length > lastBoots) {
+      const t = Object.assign(document.createElement("div"), { className:"toast", textContent:`🔥 New boot: ${data.boots.at(-1)}` });
+      document.body.append(t); setTimeout(() => t.remove(), 8000);
+    }
+    lastBoots = data.boots.length;
+    render(data);
+    foot.textContent = `Scores update from Wikipedia every 5 minutes. Last checked ${clock(new Date())}.`;
+  } catch {
+    foot.textContent = `Can't reach the island right now. Trying again in 5 minutes.`;
+  }
+}
+update();
+setInterval(update, 5 * 60 * 1000);
 </script>
 </body>
 </html>
